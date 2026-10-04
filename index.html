@@ -122,26 +122,8 @@ h1{font-size:24px;letter-spacing:2px;margin-bottom:4px}
   })(performance.now());
 })();
 
-/* 终章文字 + 动态状态 */
+/* 终章文字 + 门锁（没通关只见锁着的门，不给看一个字的正文） */
 (function () {
-  var lines = [
-    '八个字母，一个都没错',
-    '看来这个小站的里子，被你翻遍了',
-    '@',
-    '这个站没什么大目标',
-    '就是想把自己觉得好玩的东西都做一遍，摆在同一个地方',
-    '（做完了没人玩的话，大概会瘪掉吧）',
-    '@',
-    '谢谢你把它一样一样打开',
-    '<b>谢谢你玩到这里</b>'
-  ];
-  var html = '';
-  for (var i = 0; i < lines.length; i++) {
-    if (lines[i] === '@') html += '<div style="height:12px"></div>';
-    else html += '<div class="line" style="animation-delay:' + (i * 0.6 + 0.3).toFixed(2) + 's">' + lines[i] + '</div>';
-  }
-  document.getElementById('letter').innerHTML = html;
-
   /* 读取 ARG 进度（cookie .startian.top 或 localStorage） */
   function readArg() {
     var raw = null;
@@ -149,15 +131,51 @@ h1{font-size:24px;letter-spacing:2px;margin-bottom:4px}
     if (!raw) { try { raw = localStorage.getItem('st_arg'); } catch (e) {} }
     try { return JSON.parse(raw || '{}'); } catch (e) { return {}; }
   }
-  var st = readArg();
-  var n = (st.logs && st.logs.length) || 0;
+  var st = readArg() || {};
+  var unlocked = !!st.done;   /* 终端通关时才写入 done */
+
+  function render(lines) {
+    var html = '';
+    for (var i = 0; i < lines.length; i++) {
+      if (lines[i] === '@') html += '<div style="height:12px"></div>';
+      else html += '<div class="line" style="animation-delay:' + (i * 0.6 + 0.3).toFixed(2) + 's">' + lines[i] + '</div>';
+    }
+    document.getElementById('letter').innerHTML = html;
+  }
   var el = document.getElementById('state');
-  if (st.done) {
+
+  if (unlocked) {
+    render([
+      '八个字母，一个都没错',
+      '看来这个小站的里子，被你翻遍了',
+      '@',
+      '这个站没什么大目标',
+      '就是想把自己觉得好玩的东西都做一遍，摆在同一个地方',
+      '（做完了没人玩的话，大概会瘪掉吧）',
+      '@',
+      '谢谢你把它一样一样打开',
+      '<b>谢谢你玩到这里</b>'
+    ]);
     el.innerHTML = '🌌 十页日记都回来了，<b>密码也对上了</b><br>你是把这里翻到底的人——这份星光，属于你';
-  } else if (n > 0) {
-    el.innerHTML = '你手上已经有 <b>' + n + ' / 10</b> 页日记了<br>（这里随时欢迎你回来）';
   } else {
-    el.innerHTML = '如果你还不知道这是什么——<br>把它当作一阵风，也可以';
+    /* 🔒 未通关：门锁着，正文一个字都不给看 */
+    document.title = '门还锁着 · 星恬';
+    var h1 = document.querySelector('h1');
+    if (h1) h1.textContent = '门还锁着';
+    var sub = document.querySelector('.sub');
+    if (sub) sub.textContent = 'ESTHERIA · 🔒';
+    var ava = document.querySelector('.ava');
+    if (ava) ava.style.filter = 'grayscale(.72) brightness(.7)';
+    var sign = document.querySelector('.sign');
+    if (sign) sign.style.display = 'none';
+    render([
+      '这扇门只为故事的结尾而开',
+      '现在还不到时候',
+      '@',
+      '（不知道那是什么故事的话）',
+      '（先回小站逛逛吧）'
+    ]);
+    el.innerHTML = '🔒 门还没开<br>把故事讲完，它自己会开';
   }
 })();
 </script>
